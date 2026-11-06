@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wechat-article-archiver"
-version = "0.3.2"
+version = "0.3.3"
 description = "Windows-first WeChat public-account article archiver"
 readme = "README.md"
 requires-python = ">=3.10"

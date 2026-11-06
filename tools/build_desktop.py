@@ -60,7 +60,7 @@ def main() -> None:
     report = build / "desktop-smoke.json"
     report.unlink(missing_ok=True)
     env = dict(os.environ)
-    env["PATH"] = str(Path(env["SystemRoot"]) / "System32")
+    env["PATH"] = str(Path(os.environ["SystemRoot"]) / "System32")
     env.pop("PYTHONPATH", None)
     env.pop("PYTHONHOME", None)
     env["WECHAT_DOWNLOADER_HOME"] = str(build / "fresh-profile")

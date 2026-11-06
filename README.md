@@ -10,7 +10,7 @@
 ## 分享给同事
 
 对方可以直接从 [Releases](https://github.com/morinzhou00/wechat-article-archiver/releases)
-下载 **`wechat-article-archiver-windows-x64-v0.3.2.zip`**，完整解压后双击 **`WechatArchiver.exe`**。
+下载 **`wechat-article-archiver-windows-x64-v0.3.3.zip`**，完整解压后双击 **`WechatArchiver.exe`**。
 该包自带运行环境，Windows 10/11 64 位电脑无需安装 Python、Git 或 Codex，也不需要管理员权限。
 必须保留 EXE 旁边的 `_internal` 文件夹；不要在压缩包里直接运行，不要只转发 EXE。
 
@@ -75,14 +75,14 @@ cd wechat-article-archiver
 GitHub Release 同时提供免安装桌面包、纯 Skill 包和源码便携包。以下命令针对源码便携包。下载 ZIP 与 `SHA256SUMS-vX.Y.Z.txt` 后先验证：
 
 ```powershell
-Get-FileHash .\wechat-article-downloader-v0.3.2.zip -Algorithm SHA256
+Get-FileHash .\wechat-article-downloader-v0.3.3.zip -Algorithm SHA256
 ```
 
 确认与校验和文件一致，再解压并运行。便携安装器始终复制文件，不会创建指向解压目录的 junction：
 
 ```powershell
-Expand-Archive .\wechat-article-downloader-v0.3.2.zip -DestinationPath .\wechat-portable
-.\wechat-portable\wechat-article-downloader-v0.3.2\启动公众号归档器.cmd
+Expand-Archive .\wechat-article-downloader-v0.3.3.zip -DestinationPath .\wechat-portable
+.\wechat-portable\wechat-article-downloader-v0.3.3\启动公众号归档器.cmd
 ```
 
 更新 GitHub Skill：

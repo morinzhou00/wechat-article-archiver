@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.2
+## 0.3.3
 
 - Add a self-contained Windows x64 desktop ZIP; no Python installation required.
 - Verify the extracted desktop app in a Unicode path with Python removed from PATH.
