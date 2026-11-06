@@ -26,7 +26,19 @@ def main() -> int:
     skill_zip = release / f"wechat-article-downloader-skill-v{version}.zip"
     portable_zip = release / f"wechat-article-downloader-v{version}.zip"
     checksum_path = release / f"SHA256SUMS-v{version}.txt"
-    expected_files = {path.name: digest(path) for path in (skill_zip, portable_zip)}
+    desktop_zip = release / f"wechat-article-archiver-windows-x64-v{version}.zip"
+    expected_files = {path.name: digest(path) for path in (skill_zip, portable_zip, desktop_zip)}
+    with zipfile.ZipFile(desktop_zip) as archive:
+        names = archive.namelist()
+        prefix = f"WechatArchiver-v{version}/"
+        for name in ("WechatArchiver.exe", "LICENSE", "NOTICE.md", "公众号历史归档器-使用说明.md"):
+            if prefix + name not in names:
+                raise SystemExit(f"Desktop ZIP missing {name}")
+        if not any(name.endswith(".dll") for name in names):
+            raise SystemExit("Desktop ZIP has no bundled runtime")
+        forbidden_names = {"credential-metadata.json", "gui-settings.json", "history.jsonl", "config.json"}
+        if any(Path(name).name in forbidden_names for name in names):
+            raise SystemExit("Desktop ZIP contains local user state")
     checksum_rows = {}
     for line in checksum_path.read_text(encoding="ascii").splitlines():
         value, name = line.split(maxsplit=1)

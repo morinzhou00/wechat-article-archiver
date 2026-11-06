@@ -42,6 +42,10 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}".TrimStart("v")
           python .\tools\check_version.py $version
+          python -m pip install pyinstaller==6.16.0
+          if ($LASTEXITCODE -ne 0) { throw "Desktop build dependency failed" }
+          python .\tools\build_desktop.py $version
+          if ($LASTEXITCODE -ne 0) { throw "Desktop build or smoke test failed" }
           .\scripts\package-release.ps1 -Version $version
           python .\tools\verify_release.py $version
       - name: Publish GitHub Release
@@ -51,7 +55,7 @@ jobs:
         run: |
           $assets = @(
             Get-ChildItem -LiteralPath .\release -File |
-              Where-Object { $_.Extension -eq ".zip" -or $_.Name -like "SHA256SUMS-*.txt" } |
+              Where-Object { $_.Name -like "*${{ github.ref_name }}.zip" -or $_.Name -eq "SHA256SUMS-${{ github.ref_name }}.txt" } |
               ForEach-Object { $_.FullName }
           )
           if (gh release view "${{ github.ref_name }}" 2>$null) {

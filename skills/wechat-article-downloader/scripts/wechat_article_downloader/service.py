@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import time
 import uuid
@@ -138,6 +139,8 @@ class DownloadService:
                     "The account identifier could not be derived from the article or credential.",
                     details=auth_guidance(credential_alias),
                 )
+            if credential.get("biz") != biz:
+                raise AuthRequiredError("该凭据属于其他公众号，请为当前公众号重新授权。")
             provider = WeChatHistoryProvider(
                 timeout=config.timeout_seconds,
                 interval_seconds=config.request_interval_seconds,
@@ -151,9 +154,9 @@ class DownloadService:
             )
             resume_path = checkpoint_path(root, fingerprint)
             checkpoint = load_checkpoint(resume_path, fingerprint) if resume else None
-            downloaded_keys: set[str] = scan_exported_keys(root, biz) if resume else set()
-            if checkpoint:
-                downloaded_keys.update(checkpoint["downloaded_keys"])
+            downloaded_keys: set[str] = (
+                scan_exported_keys(root, biz, formats=selected_formats, include_assets=include) if resume else set()
+            )
             failed_keys: dict[str, str] = dict(checkpoint["failed_keys"]) if checkpoint else {}
 
             def persist_progress(current: DiscoveryResult) -> None:
@@ -218,6 +221,10 @@ class DownloadService:
                     else:
                         client.remove_remote_media(article)
                     exported = exporter.export(article, directory, selected_formats)
+                    export_manifest = directory / "manifest.json"
+                    saved_export = json.loads(export_manifest.read_text(encoding="utf-8"))
+                    saved_export["include_assets"] = include
+                    export_manifest.write_text(json.dumps(saved_export, ensure_ascii=False, indent=2), encoding="utf-8")
                     results.append(exported.to_dict())
                     downloaded_keys.add(key)
                     failed_keys.pop(key, None)
@@ -402,6 +409,8 @@ class DownloadService:
         biz = _biz_from_sample_url(sample_url, client, credential)
         if not biz:
             raise InvalidInputError("The sample article did not expose a public-account identifier.")
+        if credential.get("biz") != biz:
+            raise AuthRequiredError("该凭据属于其他公众号，请为当前公众号重新授权。")
         provider = WeChatHistoryProvider(
             timeout=config.timeout_seconds,
             interval_seconds=config.request_interval_seconds,
@@ -696,8 +705,6 @@ def _biz_from_sample_url(sample_url: str, client: WeChatClient, credential: dict
     biz = parse_url_fields(sample_url).get("biz")
     if biz:
         return biz
-    if credential.get("biz"):
-        return credential["biz"]
     article = client.fetch_article(sample_url)
     return article.ref.biz
 

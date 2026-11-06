@@ -10,8 +10,21 @@
 ## 分享给同事
 
 对方可以直接从 [Releases](https://github.com/morinzhou00/wechat-article-archiver/releases)
-下载 Windows 包，解压后双击 `启动公众号归档器.cmd`。首次启动会自动准备 Python
-运行环境。也可以把安装该 Skill 的下面这条命令发给使用 Codex 的同事：
+下载 **`wechat-article-archiver-windows-x64-v0.3.2.zip`**，完整解压后双击 **`WechatArchiver.exe`**。
+该包自带运行环境，Windows 10/11 64 位电脑无需安装 Python、Git 或 Codex，也不需要管理员权限。
+必须保留 EXE 旁边的 `_internal` 文件夹；不要在压缩包里直接运行，不要只转发 EXE。
+
+1. 登录 Windows 桌面微信，复制目标公众号任意一篇公开文章的链接。
+2. 启动程序，粘贴链接、选择日期和下载目录，点击“一键开始 / 继续归档”。
+3. 首次使用或登录态过期时，将程序复制的主页链接发给微信“文件传输助手”，在微信内打开。
+4. 等待下载；默认保存 HTML、Markdown、JSON 和图片。中断后用相同条件再次运行即可继续。
+
+**打开普通文章本身不一定足够**，请按程序提示打开生成的公众号主页。
+历史获取依赖微信版本及其本地缓存，无法保证所有微信版本均兼容；未取得授权时不会显示下载成功。
+Windows 桌面包是未签名程序，企业电脑可能需要 IT 审核；不要关闭杀毒软件。
+
+另两个 `wechat-article-downloader-*.zip` 是源码/Skill 包，需要 Python 3.10+。
+使用 Codex 的同事也可以安装 Skill：
 
 ```powershell
 gh skill install morinzhou00/wechat-article-archiver wechat-article-downloader --agent codex --scope user
@@ -36,7 +49,7 @@ gh skill install morinzhou00/wechat-article-archiver wechat-article-downloader -
 
 前置条件：
 
-- Windows 10/11 与 Python 3.10+；
+- 桌面 EXE 包：Windows 10/11 x64；源码/Skill 包：另需 Python 3.10+（含 tkinter）；
 - 下载公众号历史时，需要已登录的微信桌面客户端；
 - PDF 需要 Microsoft Edge、Google Chrome 或 Chromium（Windows 通常已带 Edge）；
 - 单篇公开文章下载不要求微信登录。
@@ -59,17 +72,17 @@ cd wechat-article-archiver
 
 ### 便携 ZIP
 
-GitHub Release 同时提供纯 Skill 包和 Windows 便携包。下载 ZIP 与 `SHA256SUMS-vX.Y.Z.txt` 后先验证：
+GitHub Release 同时提供免安装桌面包、纯 Skill 包和源码便携包。以下命令针对源码便携包。下载 ZIP 与 `SHA256SUMS-vX.Y.Z.txt` 后先验证：
 
 ```powershell
-Get-FileHash .\wechat-article-downloader-v0.3.1.zip -Algorithm SHA256
+Get-FileHash .\wechat-article-downloader-v0.3.2.zip -Algorithm SHA256
 ```
 
 确认与校验和文件一致，再解压并运行。便携安装器始终复制文件，不会创建指向解压目录的 junction：
 
 ```powershell
-Expand-Archive .\wechat-article-downloader-v0.3.1.zip -DestinationPath .\wechat-portable
-.\wechat-portable\wechat-article-downloader-v0.3.1\启动公众号归档器.cmd
+Expand-Archive .\wechat-article-downloader-v0.3.2.zip -DestinationPath .\wechat-portable
+.\wechat-portable\wechat-article-downloader-v0.3.2\启动公众号归档器.cmd
 ```
 
 更新 GitHub Skill：

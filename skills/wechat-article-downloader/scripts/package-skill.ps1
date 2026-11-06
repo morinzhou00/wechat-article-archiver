@@ -52,6 +52,7 @@ try {
     foreach ($name in @(
         'README.md',
         'LICENSE',
+        'NOTICE.md',
         'SECURITY.md',
         '公众号历史归档器-使用说明.md',
         '启动公众号归档器.cmd',
@@ -74,7 +75,10 @@ try {
     Compress-Archive -LiteralPath $skillStage -DestinationPath $skillZip -CompressionLevel Optimal
     Compress-Archive -LiteralPath $portable -DestinationPath $portableZip -CompressionLevel Optimal
     $checksums = Join-Path $output "SHA256SUMS-v$Version.txt"
-    $hashRows = foreach ($zip in @($skillZip, $portableZip)) {
+    $desktopZip = Join-Path $output "wechat-article-archiver-windows-x64-v$Version.zip"
+    $allZips = @($skillZip, $portableZip)
+    if (Test-Path -LiteralPath $desktopZip) { $allZips += $desktopZip }
+    $hashRows = foreach ($zip in $allZips) {
         '{0}  {1}' -f (Get-FileHash -Algorithm SHA256 -LiteralPath $zip).Hash.ToLowerInvariant(), (Split-Path -Leaf $zip)
     }
     $hashRows | Set-Content -Encoding ASCII -LiteralPath $checksums

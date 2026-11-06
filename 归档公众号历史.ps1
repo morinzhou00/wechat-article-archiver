@@ -30,8 +30,8 @@ $arguments = @(
     "--credential", $Alias,
     "--since", $Since,
     "--max-pages", "200",
-    "--formats", "md,json",
-    "--no-assets",
+    "--formats", "html,md,json",
+    "--assets",
     "--output", $OutputDir
 )
 if ($Until) {

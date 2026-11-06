@@ -9,11 +9,12 @@ from pathlib import Path
 from tkinter import BooleanVar, StringVar, Text, Tk, filedialog, messagebox
 from tkinter import ttk
 
-from .errors import AuthRequiredError
+from .errors import AuthRequiredError, InvalidInputError
 from .merge import merge_archives
 from .presets import ACCOUNT_PRESETS, preset_for_key, preset_for_label
 from .redaction import redact_text
 from .service import DownloadService
+from .utils import parse_iso_date, validate_article_url
 
 
 class ArchiveGui:
@@ -36,7 +37,7 @@ class ArchiveGui:
         self.preset = StringVar(value=saved_preset.label if saved_preset else "自定义")
         self.url = StringVar(value=str(saved.get("url") or ""))
         self.alias = StringVar(value=default_alias)
-        self.since = StringVar(value=str(saved.get("since") or "2024-01-01"))
+        self.since = StringVar(value=str(saved.get("since") or "2000-01-01"))
         self.until = StringVar(value=str(saved.get("until") or date.today().isoformat()))
         self.output = StringVar(
             value=str(saved.get("output") or Path.home() / "Downloads" / "WeChatArticles")
@@ -153,7 +154,7 @@ class ArchiveGui:
     def _copy_auth_url(self) -> None:
         value = self.auth_url.get().strip()
         if not value:
-            messagebox.showinfo("尚无链接", "请先点击“生成授权链接”。")
+            messagebox.showinfo("尚无链接", "请先点击“一键开始 / 继续归档”。")
             return
         self.root.clipboard_clear()
         self.root.clipboard_append(value)
@@ -177,8 +178,21 @@ class ArchiveGui:
         if not output:
             messagebox.showwarning("缺少输出目录", "请选择下载目录。")
             return
+        try:
+            validate_article_url(url)
+            since = parse_iso_date(self.since.get().strip() or "2000-01-01", "开始日期")
+            until = parse_iso_date(self.until.get().strip(), "结束日期")
+            if since and until and since > until:
+                raise InvalidInputError("开始日期不能晚于结束日期。")
+        except InvalidInputError as exc:
+            messagebox.showwarning("请检查输入", str(exc))
+            return
+        try:
+            self._save_settings()
+        except OSError:
+            messagebox.showerror("无法保存设置", "请检查本地配置目录的写入权限。")
+            return
         self._set_busy(True)
-        self._save_settings()
         self._append("开始检测。有效凭据将直接复用。")
         run_options = {
             "alias": self.alias.get().strip() or "default",
@@ -225,13 +239,13 @@ class ArchiveGui:
                 since=options["since"],
                 until=options["until"],
                 max_pages=200,
-                formats="md,json",
+                formats="html,md,json",
                 output_dir=output,
-                include_assets=False,
+                include_assets=True,
                 progress=lambda event: self.events.put(("log", self._history_text(event))),
                 resume=True,
             )
-            self.events.put(("log", f"归档完成：发现 {len(result.get('discovered', []))} 篇，"
+            self.events.put(("log", f"本轮结束：发现 {len(result.get('discovered', []))} 篇，"
                                      f"本次下载 {len(result.get('downloads', []))} 篇，"
                                      f"已有跳过 {result.get('resume', {}).get('skipped_existing', 0)} 篇。"))
             if merge_target:
@@ -274,8 +288,12 @@ class ArchiveGui:
                     self._prepare_auth_link(str(payload))
                 elif kind == "done":
                     self._set_busy(False)
-                    self._append("操作完成。")
-                    messagebox.showinfo("完成", "公众号历史归档完成。")
+                    title, message, complete = completion_message(payload)
+                    self._append(message)
+                    if complete:
+                        messagebox.showinfo(title, message)
+                    else:
+                        messagebox.showwarning(title, message)
                 elif kind == "error":
                     self._set_busy(False)
                     self._append(f"失败：{payload}")
@@ -347,6 +365,18 @@ def main() -> None:
     root = Tk()
     ArchiveGui(root, initial_preset_key=os.environ.get("WECHAT_ARCHIVE_PRESET"))
     root.mainloop()
+
+
+def completion_message(result: dict[str, object]) -> tuple[str, str, bool]:
+    complete = bool(result.get("ok")) and bool(result.get("history_scan", {}).get("complete"))
+    failures = len(result.get("failures", []))
+    if complete and not failures:
+        return "完成", "所选日期范围的公众号历史归档完成。HTML、Markdown、JSON 和图片已保存。", True
+    return (
+        "尚未全部完成",
+        f"本轮下载失败 {failures} 篇。历史分页或文章下载尚未全部完成，请点击“一键开始 / 继续归档”重试。",
+        False,
+    )
 
 
 if __name__ == "__main__":

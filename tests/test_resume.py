@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+import json
 import unittest
 from datetime import date, datetime
 from pathlib import Path
@@ -13,6 +14,7 @@ from wechat_article_downloader.resume import (
     load_checkpoint,
     make_fingerprint,
     save_checkpoint,
+    scan_exported_keys,
 )
 
 
@@ -20,6 +22,24 @@ SHANGHAI = ZoneInfo("Asia/Shanghai")
 
 
 class ResumeTests(unittest.TestCase):
+    def test_missing_media_or_new_format_requires_download(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "article.json").write_text(json.dumps({
+                "biz": "biz", "mid": "1", "idx": "1",
+                "assets": [{"relative_path": "assets/a.png"}],
+            }), encoding="utf-8")
+            (root / "article.md").write_text("text", encoding="utf-8")
+            (root / "manifest.json").write_text('{"include_assets": true}', encoding="utf-8")
+            self.assertEqual(scan_exported_keys(root, "biz", formats=["html"]), set())
+            (root / "article.html").write_text("text", encoding="utf-8")
+            self.assertEqual(scan_exported_keys(root, "biz", include_assets=True), set())
+            (root / "assets").mkdir()
+            (root / "assets/a.png").write_bytes(b"image")
+            self.assertEqual(scan_exported_keys(root, "biz", include_assets=True), {"biz:1:1"})
+            (root / "manifest.json").write_text('{}', encoding="utf-8")
+            self.assertEqual(scan_exported_keys(root, "biz", include_assets=True), set())
+
     def test_checkpoint_round_trips_public_history_and_download_state(self) -> None:
         fingerprint = make_fingerprint(
             "MzTest==",

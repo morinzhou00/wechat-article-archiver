@@ -130,6 +130,7 @@ class WeChatClient:
                 candidates.append((node, "poster", str(node.get("poster"))))
 
         downloaded: dict[str, ArticleAsset] = {}
+        failed = 0
         total_bytes = 0
         for index, (node, attribute, remote_url) in enumerate(candidates, start=1):
             if remote_url in downloaded:
@@ -137,11 +138,13 @@ class WeChatClient:
                 continue
             if len(downloaded) >= max_assets or total_bytes >= max_total_bytes:
                 node.attrs.pop(attribute, None)
+                failed += 1
                 continue
             remaining = max_total_bytes - total_bytes
             asset = self._download_asset(remote_url, assets_dir, index, min(max_asset_bytes, remaining))
             if asset is None:
                 node.attrs.pop(attribute, None)
+                failed += 1
                 continue
             downloaded[remote_url] = asset
             total_bytes += asset.size
@@ -152,6 +155,11 @@ class WeChatClient:
         _remove_lazy_media_attributes(soup)
         article.content_html = str(soup)
         article.content_markdown = markdownify(article.content_html, heading_style="ATX", bullets="-").strip()
+        if failed:
+            raise RemoteError(
+                "部分图片或媒体下载失败，请重试；本篇未标记为完整归档。",
+                details={"failed_media": failed},
+            )
 
     def remove_remote_media(self, article: Article) -> None:
         soup = BeautifulSoup(article.content_html, "html.parser")

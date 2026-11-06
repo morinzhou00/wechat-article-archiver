@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import unittest
+import tempfile
+from pathlib import Path
 from unittest.mock import Mock
 
 from wechat_article_downloader.client import (
@@ -14,6 +16,16 @@ from wechat_article_downloader.models import Article, ArticleRef
 
 
 class ClientTests(unittest.TestCase):
+    def test_missing_image_is_not_silently_successful(self):
+        article = Article(
+            ArticleRef("https://mp.weixin.qq.com/s/test"), "test", None, None, None, None,
+            '<img src="https://mmbiz.qpic.cn/a.png">', "", "",
+        )
+        client = WeChatClient(interval_seconds=1)
+        client._download_asset = Mock(return_value=None)
+        with tempfile.TemporaryDirectory() as directory, self.assertRaises(RemoteError):
+            client.download_assets(article, Path(directory))
+
     def test_authenticated_article_url_adds_short_lived_fields(self) -> None:
         value = _authenticated_article_url(
             "https://mp.weixin.qq.com/s?__biz=MzTest==&mid=1&idx=1&sn=abc",

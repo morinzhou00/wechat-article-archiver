@@ -99,7 +99,10 @@ def item_key(item: HistoryItem) -> str:
     return f"url:{digest}"
 
 
-def scan_exported_keys(root: Path, biz: str, *, max_files: int = 20_000) -> set[str]:
+def scan_exported_keys(
+    root: Path, biz: str, *, max_files: int = 20_000,
+    formats: list[str] | None = None, include_assets: bool = False,
+) -> set[str]:
     """Find successfully exported article metadata so an interrupted legacy run can resume."""
     keys: set[str] = set()
     if not root.exists():
@@ -126,11 +129,27 @@ def scan_exported_keys(root: Path, biz: str, *, max_files: int = 20_000) -> set[
                     continue
                 if not entry.with_name("manifest.json").is_file():
                     continue
+                if any(not entry.with_name(f"article.{suffix}").is_file() for suffix in (formats or [])):
+                    continue
+                manifest = json.loads(entry.with_name("manifest.json").read_text(encoding="utf-8"))
+                if not isinstance(manifest, dict):
+                    continue
+                if include_assets and manifest.get("include_assets") is not True:
+                    continue
                 payload = json.loads(entry.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError):
                 continue
             if not isinstance(payload, dict) or payload.get("biz") != biz:
                 continue
+            if include_assets:
+                assets = payload.get("assets", [])
+                if not isinstance(assets, list) or any(
+                    not isinstance(asset, dict)
+                    or not asset.get("relative_path")
+                    or not (entry.parent / str(asset["relative_path"])).is_file()
+                    for asset in assets
+                ):
+                    continue
             biz_value = payload.get("biz")
             mid_value = payload.get("mid")
             idx_value = payload.get("idx")

@@ -52,6 +52,14 @@ class ContinuingProvider:
 
 
 class ServiceTests(unittest.TestCase):
+    def test_short_url_resolves_target_instead_of_reusing_previous_account(self):
+        client = Mock()
+        client.fetch_article.return_value.ref.biz = "new-account"
+        self.assertEqual(
+            _biz_from_sample_url("https://mp.weixin.qq.com/s/short", client, {"biz": "old-account"}),
+            "new-account",
+        )
+
     def test_biz_is_taken_from_article_url_without_fetching_captcha_page(self) -> None:
         client = Mock()
         client.fetch_article.side_effect = AssertionError("network fetch should not be needed")

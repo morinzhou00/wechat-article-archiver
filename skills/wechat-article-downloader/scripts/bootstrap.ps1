@@ -11,14 +11,14 @@ if (Get-Command py.exe -ErrorAction SilentlyContinue) {
 } elseif (Get-Command python.exe -ErrorAction SilentlyContinue) {
     & python.exe -m venv $runtimeDir
 } else {
-    throw "Python 3.10+ is required."
+    throw "Python 3.10+ with tkinter is required for the source package. Or download the windows-x64 desktop ZIP, which needs no Python installation."
 }
 if ($LASTEXITCODE -ne 0) {
     throw "Failed to create the Python runtime (exit code $LASTEXITCODE)."
 }
 
 $python = Join-Path $runtimeDir "Scripts\python.exe"
-& $python -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)"
+& $python -c "import sys, tkinter; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)"
 if ($LASTEXITCODE -ne 0) {
     throw "Python 3.10 or newer is required."
 }
