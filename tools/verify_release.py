@@ -41,6 +41,8 @@ def main() -> int:
                 f"wechat-article-downloader-v{version}/install.ps1",
                 f"wechat-article-downloader-v{version}/LICENSE",
                 f"wechat-article-downloader-v{version}/docs/protocol-principles.md",
+                f"wechat-article-downloader-v{version}/启动公众号归档器.cmd",
+                f"wechat-article-downloader-v{version}/归档公众号历史.ps1",
                 f"wechat-article-downloader-v{version}/skills/wechat-article-downloader/SKILL.md",
             ),
         ),

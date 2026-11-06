@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+- Include the desktop launcher and Windows usage guide in the downloadable package.
+- Clarify that the packaged workflow can be started without installing the Agent Skill first.
+
 ## 0.3.0
 
 - Publish the maintained fork as a standalone Windows and Agent Skill project.

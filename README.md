@@ -62,14 +62,14 @@ cd wechat-article-archiver
 GitHub Release 同时提供纯 Skill 包和 Windows 便携包。下载 ZIP 与 `SHA256SUMS-vX.Y.Z.txt` 后先验证：
 
 ```powershell
-Get-FileHash .\wechat-article-downloader-v0.3.0.zip -Algorithm SHA256
+Get-FileHash .\wechat-article-downloader-v0.3.1.zip -Algorithm SHA256
 ```
 
 确认与校验和文件一致，再解压并运行。便携安装器始终复制文件，不会创建指向解压目录的 junction：
 
 ```powershell
-Expand-Archive .\wechat-article-downloader-v0.3.0.zip -DestinationPath .\wechat-portable
-.\wechat-portable\wechat-article-downloader-v0.3.0\install.ps1
+Expand-Archive .\wechat-article-downloader-v0.3.1.zip -DestinationPath .\wechat-portable
+.\wechat-portable\wechat-article-downloader-v0.3.1\启动公众号归档器.cmd
 ```
 
 更新 GitHub Skill：

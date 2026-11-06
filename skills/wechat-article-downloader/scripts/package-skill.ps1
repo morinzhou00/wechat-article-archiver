@@ -49,7 +49,14 @@ try {
     Copy-SkillTree -Source $skill -Destination $skillStage
     Copy-SkillTree -Source $skill -Destination (Join-Path $portable "skills\$SkillName")
     Copy-Item -LiteralPath (Join-Path $skillStage 'scripts\install-portable.ps1') -Destination (Join-Path $portable 'install.ps1')
-    foreach ($name in @('README.md', 'LICENSE', 'SECURITY.md')) {
+    foreach ($name in @(
+        'README.md',
+        'LICENSE',
+        'SECURITY.md',
+        '公众号历史归档器-使用说明.md',
+        '启动公众号归档器.cmd',
+        '归档公众号历史.ps1'
+    )) {
         $source = Join-Path $repo $name
         if (Test-Path -LiteralPath $source) {
             Copy-Item -LiteralPath $source -Destination (Join-Path $portable $name)
