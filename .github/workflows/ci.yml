@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --disable-pip-version-check -r requirements-dev.txt -e .
+      - run: ruff check skills/wechat-article-downloader/scripts/wechat_article_downloader tests tools
+      - run: python -m unittest discover -s tests -v
+        env:
+          PYTHONPATH: skills/wechat-article-downloader/scripts
+      - run: python tools/validate_repo.py
+      - name: PowerShell CLI wrapper smoke test
+        shell: pwsh
+        run: |
+          $env:WECHAT_DOWNLOADER_HOME = Join-Path $env:RUNNER_TEMP "wechat-downloader-home"
+          $env:WECHAT_DOWNLOADER_PYTHON = (Get-Command python).Source
+          $unicodeOutput = Join-Path $env:RUNNER_TEMP "微信文章"
+          $payload = .\skills\wechat-article-downloader\scripts\wechat-download.ps1 `
+            --json config set --formats md,json --output-dir $unicodeOutput | ConvertFrom-Json
+          if (
+            -not $payload.ok -or
+            ($payload.config.default_formats -join ",") -ne "md,json" -or
+            $payload.config.output_dir -ne $unicodeOutput
+          ) {
+            throw "PowerShell argument or UTF-8 normalization failed."
+          }
+      - run: python -m build

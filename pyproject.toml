@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wechat-article-archiver"
+version = "0.3.0"
+description = "Windows-first WeChat public-account article archiver"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  {name = "tingaidehua"},
+  {name = "morinzhou00"},
+]
+dependencies = [
+  "beautifulsoup4==4.13.4",
+  "keyring==25.6.0",
+  "markdownify==1.1.0",
+  "psutil==7.0.0",
+  "python-docx==1.2.0",
+  "requests==2.33.0",
+  "tzdata==2025.2",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3",
+]
+
+[project.scripts]
+wechat-download = "wechat_article_downloader.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/morinzhou00/wechat-article-archiver"
+Issues = "https://github.com/morinzhou00/wechat-article-archiver/issues"
+
+[tool.setuptools.packages.find]
+where = ["skills/wechat-article-downloader/scripts"]
+
+[tool.setuptools.package-data]
+wechat_article_downloader = ["static/*"]

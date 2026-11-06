@@ -1,0 +1,23 @@
+{
+  "ret": 0,
+  "can_msg_continue": 1,
+  "next_offset": 10,
+  "general_msg_list": {
+    "list": [
+      {
+        "comm_msg_info": {"datetime": 1767225600, "id": "9001"},
+        "app_msg_ext_info": {
+          "title": "主文章",
+          "digest": "主摘要",
+          "content_url": "/s?__biz=MzTestBiz%3D%3D&amp;mid=9001&amp;idx=1&amp;sn=aaa",
+          "multi_app_msg_item_list": [
+            {
+              "title": "次文章",
+              "content_url": "http://mp.weixin.qq.com/s?__biz=MzTestBiz%3D%3D&amp;mid=9001&amp;idx=2&amp;sn=bbb"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

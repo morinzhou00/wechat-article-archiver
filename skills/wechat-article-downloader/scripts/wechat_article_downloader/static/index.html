@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>微信公众号文章下载器</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header>
+    <p class="eyebrow">LOCAL CONTROL CONSOLE</p>
+    <h1>微信公众号文章下载器</h1>
+    <p>公开文章下载、历史筛选、离线导出和运行诊断。仅监听本机回环地址。</p>
+  </header>
+  <main>
+    <section class="metrics" id="metrics"></section>
+    <section class="grid">
+      <article>
+        <h2>下载单篇文章</h2>
+        <form id="article-form">
+          <label>文章 URL<input name="url" type="url" required placeholder="https://mp.weixin.qq.com/s/..."></label>
+          <label>格式<input name="formats" value="html,md,pdf"></label>
+          <label>输出目录（可选）<input name="output"></label>
+          <label class="check"><input name="assets" type="checkbox" checked> 下载图片与媒体</label>
+          <button>开始下载</button>
+        </form>
+      </article>
+      <article>
+        <h2>按公众号历史下载</h2>
+        <form id="account-form">
+          <label>该公众号任意文章 URL<input name="sample_url" type="url" required></label>
+          <div class="row"><label>最新篇数<input name="latest" type="number" min="1" max="100" value="3"></label><label>指定日期<input name="date" type="date"></label></div>
+          <div class="row"><label>起始日期<input name="since" type="date"></label><label>结束日期<input name="until" type="date"></label></div>
+          <label>凭据别名<input name="credential" value="default"></label>
+          <label>格式<input name="formats" value="html,md,pdf"></label>
+          <label class="check"><input name="assets" type="checkbox" checked> 下载图片与媒体</label>
+          <button>开始批量下载</button>
+        </form>
+        <p class="hint">凭据只能通过终端的 <code>auth capture</code> 或隐藏输入导入，网页不接收密钥。</p>
+      </article>
+    </section>
+    <section>
+      <h2>处理管线与数据源</h2>
+      <div class="grid compact"><div><h3>管线</h3><ol id="pipeline"></ol></div><div><h3>数据源</h3><ul id="sources"></ul></div></div>
+    </section>
+    <section>
+      <h2>任务与历史</h2>
+      <div id="notice" role="status"></div>
+      <div class="table-wrap"><table><thead><tr><th>时间</th><th>类型</th><th>状态</th><th>详情</th></tr></thead><tbody id="jobs"></tbody></table></div>
+    </section>
+    <section>
+      <h2>安全边界与参数覆盖</h2>
+      <div class="grid compact"><pre id="security"></pre><div id="parity"></div></div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

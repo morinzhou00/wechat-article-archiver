@@ -1,0 +1,4 @@
+interface:
+  display_name: "微信公众号文章下载器"
+  short_description: "下载、筛选、分析并导出微信公众号文章"
+  default_prompt: "Use $wechat-article-downloader to download the latest three articles from this WeChat public account as PDF and Markdown, then summarize them."
